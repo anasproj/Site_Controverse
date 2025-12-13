@@ -3,540 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L'ALGORITHME DE L'ADDICTION | ENQUÊTE EXCLUSIVE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&family=Inter:wght@300;400;800&display=swap" rel="stylesheet">
+    <title>Enquête : Shopping & IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         /* =========================================
-           1. CORE VARIABLES & RESET
+           CONFIG & VARIABLES
            ========================================= */
         :root {
-            --bg-dark: #030303;
-            --bg-panel: #0f0f0f;
-            --primary: #00f3ff; /* Cyan Cyberpunk */
+            --bg-dark: #050505;
+            --bg-card: #111;
+            --primary: #00f3ff; /* Bleu Cyber */
             --secondary: #ff6600; /* Orange Temu */
-            --alert: #ff003c; /* Rouge Glitch */
-            --text-main: #e0e0e0;
-            --text-dim: #888888;
-            --font-display: 'Rajdhani', sans-serif;
+            --alert: #ff2a2a; /* Rouge Alerte */
+            --text-main: #f0f0f0;
+            --text-muted: #888;
+            --font-head: 'Rajdhani', sans-serif;
             --font-body: 'Inter', sans-serif;
             --font-code: 'Share Tech Mono', monospace;
-            --easing: cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: var(--font-body);
-            overflow-x: hidden;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
+        /* Scrollbar custom */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
         /* =========================================
-           2. LOADER SCREEN (HACKER STYLE)
+           ANIMATIONS & UTILITAIRES
+           ========================================= */
+        .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .highlight { color: var(--secondary); }
+        .code-tag { font-family: var(--font-code); color: var(--primary); font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* =========================================
+           LOADER SCREEN
            ========================================= */
         #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: var(--font-code);
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
-        .loader-text { font-size: 1.2rem; color: var(--primary); margin-bottom: 20px; }
-        .loader-bar { width: 300px; height: 2px; background: #333; position: relative; overflow: hidden; }
-        .loader-progress {
-            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            animation: load 2.5s var(--easing) forwards;
-        }
-        @keyframes load { 0% { width: 0%; } 100% { width: 100%; } }
-        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .loader-bar { width: 200px; height: 2px; background: #333; margin-top: 10px; overflow: hidden; }
+        .loader-progress { width: 0%; height: 100%; background: var(--secondary); animation: load 2s forwards; }
+        @keyframes load { to { width: 100%; } }
+        .hidden { opacity: 0; pointer-events: none; transition: 0.5s; }
 
         /* =========================================
-           3. BACKGROUND ANIMATION (CANVAS)
-           ========================================= */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.3;
-        }
-
-        /* =========================================
-           4. NAVIGATION & HUD
-           ========================================= */
-        nav {
-            position: fixed; top: 0; width: 100%;
-            padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 100;
-            background: rgba(3, 3, 3, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .brand {
-            font-family: var(--font-display);
-            font-size: 1.5rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px;
-            color: white;
-        }
-        .brand span { color: var(--alert); }
-        .nav-links a {
-            color: var(--text-dim); text-decoration: none;
-            margin-left: 30px; font-size: 0.9rem; font-weight: 500;
-            transition: 0.3s; position: relative;
-        }
-        .nav-links a:hover { color: var(--primary); }
-        .nav-links a::after {
-            content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 1px;
-            background: var(--primary); transition: 0.3s;
-        }
-        .nav-links a:hover::after { width: 100%; }
-
-        /* =========================================
-           5. HERO SECTION (GLITCH EFFECT)
+           HERO SECTION
            ========================================= */
         .hero {
-            height: 100vh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; position: relative;
-            padding: 0 20px;
+            min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            padding: 20px 10%; position: relative;
+            background: radial-gradient(circle at top right, #1a0a00 0%, var(--bg-dark) 60%);
         }
-        .hero-label {
-            font-family: var(--font-code); color: var(--primary);
-            font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 20px;
-            border: 1px solid var(--primary); padding: 5px 15px;
-        }
+        
         h1 {
-            font-family: var(--font-display);
-            font-size: clamp(3rem, 8vw, 6rem);
-            line-height: 0.9; text-transform: uppercase;
-            margin-bottom: 30px; position: relative;
+            font-family: var(--font-head); font-size: clamp(3rem, 6vw, 5rem);
+            line-height: 1; text-transform: uppercase; margin-bottom: 20px;
         }
-        .glitch-text { position: relative; color: white; }
-        .glitch-text::before, .glitch-text::after {
-            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        
+        .intro-box {
+            border-left: 4px solid var(--primary);
+            padding-left: 20px; max-width: 800px; margin-top: 30px;
         }
-        .glitch-text::before {
-            left: 2px; text-shadow: -1px 0 var(--alert); clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
+        .intro-text { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; }
+        .controverse-badge {
+            display: inline-block; background: rgba(255, 42, 42, 0.1); color: var(--alert);
+            padding: 5px 15px; border: 1px solid var(--alert); font-family: var(--font-code);
+            margin-top: 10px;
         }
-        .glitch-text::after {
-            left: -2px; text-shadow: -1px 0 var(--primary); clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
-        }
-        @keyframes glitch-anim {
-            0% { clip: rect(12px, 9999px, 5px, 0); }
-            5% { clip: rect(85px, 9999px, 100px, 0); }
-            10% { clip: rect(0, 0, 0, 0); }
-            100% { clip: rect(0, 0, 0, 0); }
-        }
-        @keyframes glitch-anim2 {
-            0% { clip: rect(50px, 9999px, 80px, 0); }
-            5% { clip: rect(10px, 9999px, 20px, 0); }
-            10% { clip: rect(0, 0, 0, 0); }
-            100% { clip: rect(0, 0, 0, 0); }
-        }
-        .hero p { max-width: 600px; color: var(--text-dim); margin-bottom: 40px; font-size: 1.1rem; }
-        .btn-main {
-            padding: 18px 40px; background: white; color: black;
-            font-family: var(--font-code); font-weight: bold; text-decoration: none;
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
-            transition: 0.3s;
-        }
-        .btn-main:hover { background: var(--primary); box-shadow: 0 0 30px var(--primary); transform: translateY(-5px); }
 
         /* =========================================
-           6. CONTENT SECTIONS (GRID & CARDS)
+           PARTIE 1 : PERSONNALISATION
            ========================================= */
-        .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px; }
+        .section-container { padding: 100px 10%; max-width: 1400px; margin: 0 auto; }
         
-        .section-header { margin-bottom: 80px; border-left: 4px solid var(--secondary); padding-left: 20px; }
-        .section-header h2 { font-family: var(--font-display); font-size: 3rem; text-transform: uppercase; }
-        .section-header p { font-family: var(--font-code); color: var(--secondary); margin-top: 10px; }
+        .section-title {
+            font-family: var(--font-head); font-size: 3rem; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .section-number { color: var(--bg-dark); -webkit-text-stroke: 1px var(--text-muted); font-size: 4rem; opacity: 0.5; }
 
-        /* --- FEATURE GRID --- */
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        .split-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 50px;
+        }
+
+        .card {
+            background: var(--bg-card); padding: 30px; border-radius: 8px;
+            border: 1px solid #222; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); border-color: #444; }
+
+        .card.positive { border-top: 3px solid var(--primary); }
+        .card.negative { border-top: 3px solid var(--alert); }
+
+        .argument-list li { margin-bottom: 15px; padding-left: 20px; position: relative; list-style: none; }
+        .argument-list li::before { content: '>'; color: var(--text-muted); position: absolute; left: 0; }
         
-        .feature-card {
-            background: var(--bg-panel); padding: 40px;
-            border: 1px solid #222; position: relative; overflow: hidden;
-            transition: 0.4s;
-        }
-        .feature-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, var(--secondary), transparent);
-            transform: scaleX(0); transform-origin: left; transition: 0.4s;
-        }
-        .feature-card:hover { border-color: #444; transform: translateY(-10px); }
-        .feature-card:hover::before { transform: scaleX(1); }
-        
-        .icon-box {
-            font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main);
-        }
-        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; color: white; }
-        .feature-card p { font-size: 0.95rem; color: #aaa; margin-bottom: 20px; }
         .citation {
-            font-size: 0.75rem; font-family: var(--font-code); color: #555;
-            border-top: 1px solid #222; padding-top: 15px; display: block;
+            display: block; font-size: 0.75rem; color: #666; font-family: var(--font-code); margin-top: 5px;
+        }
+
+        .debate-box {
+            grid-column: 1 / -1; margin-top: 40px;
+            background: linear-gradient(90deg, #111, #0a0a0a);
+            padding: 30px; border: 1px dashed #444; text-align: center;
         }
 
         /* =========================================
-           7. INTERACTIVE GAMIFICATION MODULE
+           PARTIE 2 : GAMIFICATION (INTERACTIF)
            ========================================= */
         .gamification-zone {
-            background: radial-gradient(circle at center, #220e00 0%, #000 70%);
-            border: 1px solid var(--secondary);
-            border-radius: 20px; padding: 60px 20px; text-align: center;
-            position: relative; overflow: hidden; margin: 50px 0;
+            background: #0f0f0f; border-radius: 20px; padding: 40px;
+            border: 1px solid var(--secondary); text-align: center;
+            margin: 40px 0; position: relative; overflow: hidden;
         }
-        .zone-badge {
-            position: absolute; top: 20px; right: 20px;
-            background: var(--alert); color: white; padding: 5px 10px;
-            font-weight: bold; font-size: 0.8rem; border-radius: 4px;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        
+
         .slot-machine {
             display: flex; justify-content: center; gap: 10px; margin: 30px 0;
         }
         .slot {
             width: 80px; height: 100px; background: #fff; color: #000;
-            font-size: 3rem; display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-weight: bold;
-            box-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
+            font-size: 2.5rem; display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-weight: 700;
         }
-        
-        .btn-spin {
+
+        .btn-temu {
             background: var(--secondary); color: white; border: none;
-            padding: 15px 50px; font-size: 1.2rem; font-weight: bold;
-            cursor: pointer; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
-            transition: 0.2s;
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 50px;
+            cursor: pointer; transition: 0.2s;
         }
-        .btn-spin:active { transform: scale(0.95); }
+        .btn-temu:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,102,0,0.4); }
+
+        .mechanic-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;
+            margin-top: 40px; text-align: left;
+        }
 
         /* =========================================
-           8. DATA VISUALIZATION (CSS CHARTS)
-           ========================================= */
-        .chart-container {
-            display: flex; flex-direction: column; gap: 20px; background: #111; padding: 30px; border-radius: 10px;
-        }
-        .bar-group { display: flex; align-items: center; gap: 15px; }
-        .bar-label { width: 150px; font-family: var(--font-code); font-size: 0.85rem; color: #888; }
-        .bar-track { flex-grow: 1; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1.5s var(--easing); }
-        .bar-fill.warning { background: var(--secondary); }
-        .bar-fill.danger { background: var(--alert); }
-
-        /* =========================================
-           9. FOOTER & TERMINAL
+           FOOTER
            ========================================= */
         footer {
-            background: #000; padding: 80px 20px; border-top: 1px solid #222;
+            padding: 50px; text-align: center; border-top: 1px solid #222;
+            font-size: 0.9rem; color: #555;
         }
-        .terminal {
-            max-width: 800px; margin: 0 auto; background: #0a0a0a;
-            border: 1px solid #333; padding: 20px; font-family: var(--font-code); font-size: 0.9rem;
-        }
-        .terminal-header { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px; color: #555; }
-        .cmd { color: var(--primary); }
-        .output { color: #888; margin-bottom: 10px; }
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* POPUP FOMO */
-        .fomo-popup {
-            position: fixed; bottom: 20px; right: 20px; width: 320px;
-            background: white; color: black; padding: 20px;
-            border-left: 10px solid var(--alert);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            transform: translateX(150%); transition: transform 0.5s var(--easing);
-            z-index: 1000; font-family: var(--font-body);
+        /* Responsive */
+        @media (max-width: 768px) {
+            .split-layout { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+            .section-container { padding: 60px 20px; }
         }
-        .fomo-popup.active { transform: translateX(0); }
-        .timer-count { font-weight: 900; font-size: 2rem; color: var(--alert); display: block; }
     </style>
 </head>
 <body>
 
     <div id="loader">
-        <div class="loader-text">INITIALISATION DU SYSTÈME DE TRAÇAGE...</div>
+        <div style="font-family: var(--font-code); color: var(--secondary);">INITIALISATION DE L'ALGORITHME...</div>
         <div class="loader-bar"><div class="loader-progress"></div></div>
     </div>
 
-    <canvas id="bg-canvas"></canvas>
-
-    <nav>
-        <div class="brand">PROJET <span>CONTROVERSE</span></div>
-        <div class="nav-links">
-            <a href="#personnalisation">01. CIBLAGE</a>
-            <a href="#gamification">02. ADDICTION</a>
-            <a href="#consequences">03. IMPACT</a>
-        </div>
-    </nav>
-
     <section class="hero">
-        <div class="hero-label">ENQUÊTE EXCLUSIVE 2025</div>
-        <h1 class="glitch-text" data-text="SHOPPING SOUS INFLUENCE">SHOPPING SOUS <br><span style="color:var(--secondary)">INFLUENCE</span></h1>
-        <p>Shein, Temu et l'IA : Comment les algorithmes exploitent vos failles cognitives pour transformer votre cerveau en machine à acheter.</p>
-        <a href="#personnalisation" class="btn-main">DÉMARRER L'ANALYSE</a>
-    </section>
-
-    <section id="personnalisation" class="container">
-        <div class="section-header">
-            <h2>01 / Personnalisation ou Manipulation ?</h2>
-            <p>SOURCE : HUMBLET (2025), BAUMANN ET AL. (2018)</p>
-        </div>
+        <span class="code-tag">/// DOSSIER SPÉCIAL</span>
+        <h1>SHOPPING SOUS <br><span class="highlight">INFLUENCE</span></h1>
         
-        <div class="grid-3">
-            <div class="feature-card">
-                <div class="icon-box">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                </div>
-                <h3>L'Illusion du Confort</h3>
-                <p>L'IA analyse vos comportements (clics, zoom, temps d'arrêt) pour affiner l'offre. La promesse ? Trouver la robe parfaite sans chercher.</p>
-                <span class="citation">"Un gain de confort apparent qui masque une surveillance constante." — Humblet</span>
-            </div>
-            
-            <div class="feature-card" style="border-color: var(--alert);">
-                <div class="icon-box" style="color: var(--alert);">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
-                </div>
-                <h3>Prix Dynamiques</h3>
-                <p>Les algorithmes ajustent les prix et promotions en temps réel. Si l'IA détecte une impulsion (soirée, navigation rapide), elle augmente la pression.</p>
-                <span class="citation">"Maximiser la probabilité d'achat, pas la satisfaction." — Baumann</span>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon-box">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
-                </div>
-                <h3>Confiance Aveugle</h3>
-                <p>Le consommateur finit par faire plus confiance à l'algorithme qu'à son propre jugement, baissant sa garde face aux achats inutiles.</p>
-                <span class="citation">Gallin & Portes (2024)</span>
-            </div>
-        </div>
-    </section>
-
-    <section id="gamification" class="container">
-        <div class="section-header">
-            <h2>02 / Le Casino Numérique</h2>
-            <p>L'USINE À DOPAMINE - AL-KHALFA & HAMEED (2025)</p>
-        </div>
-
-        <div class="gamification-zone">
-            <div class="zone-badge">TEST LIVE</div>
-            <h3 style="font-size: 2rem; margin-bottom: 20px;">L'EXPÉRIENCE TEMU</h3>
-            <p style="max-width: 600px; margin: 0 auto; color: #ccc;">
-                Essayez de ne pas cliquer. Temu et Shein utilisent des "récompenses variables" pour activer votre circuit de la récompense, exactement comme une machine à sous.
+        <div class="intro-box reveal">
+            <p class="intro-text">
+                L’usage intensif de l’intelligence artificielle (IA) par les plateformes comme Shein et Temu transforme profondément la manière dont les consommateurs achètent. 
             </p>
-            
-            <div class="slot-machine">
-                <div class="slot" id="slot1">?</div>
-                <div class="slot" id="slot2">?</div>
-                <div class="slot" id="slot3">?</div>
-            </div>
-            
-            <button class="btn-spin" onclick="spinSlots()">TENTER MA CHANCE</button>
-            <p id="slot-msg" style="margin-top: 20px; font-family: var(--font-code); color: var(--secondary); height: 20px;"></p>
-        </div>
-
-        <div class="chart-container">
-            <h3 style="margin-bottom: 20px; font-family: var(--font-code);">TEMPS MOYEN PASSÉ (ESTIMATION)</h3>
-            
-            <div class="bar-group">
-                <span class="bar-label">Site E-commerce Classique</span>
-                <div class="bar-track"><div class="bar-fill" style="width: 25%;"></div></div>
-                <span style="color:#555">5 min</span>
-            </div>
-            
-            <div class="bar-group">
-                <span class="bar-label">Shein (Fast Fashion)</span>
-                <div class="bar-track"><div class="bar-fill warning" style="width: 55%;"></div></div>
-                <span style="color:#555">11 min</span>
-            </div>
-            
-            <div class="bar-group">
-                <span class="bar-label">Temu (Gamifié)</span>
-                <div class="bar-track"><div class="bar-fill danger" style="width: 90%;"></div></div>
-                <span style="color:var(--alert)">22 min+</span>
-            </div>
-            <p style="font-size: 0.8rem; color: #555; margin-top: 10px;">*Données illustratives basées sur les mécanismes de rétention (Li et al., 2024)</p>
+            <p class="intro-text" style="color: white;">
+                <strong>La question qui divise :</strong> L’IA améliore-t-elle l’expérience d’achat ou manipule-t-elle l’utilisateur jusqu’à créer une dépendance ?
+            </p>
+            <div class="controverse-badge">CONTROVERSE MAJEURE</div>
         </div>
     </section>
 
-    <section id="consequences" class="container">
-        <div class="section-header">
-            <h2>03 / Le Prix à Payer</h2>
-            <p>ETHIQUE, ENVIRONNEMENT & SOCIÉTÉ</p>
+    <section class="section-container">
+        <div class="section-title reveal">
+            <span class="section-number">01</span>
+            Personnalisation <br>ou Manipulation ?
         </div>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 40px;">
-            <div style="flex: 1; min-width: 300px;">
-                <h3 style="color: var(--primary); margin-bottom: 20px;">Le Cynisme de Plateforme</h3>
-                <p style="margin-bottom: 20px;">
-                    Liu & Gomez-Cruz (2025) décrivent un phénomène fascinant : les utilisateurs <strong>savent</strong> qu'ils sont manipulés. Ils perçoivent les arnaques, les faux comptes à rebours et la surveillance.
-                </p>
-                <p style="border-left: 3px solid var(--text-dim); padding-left: 20px; font-style: italic; color: #aaa;">
-                    "Je sais que la roue est truquée, mais si je gagne un coupon de 2€, je suis content."
-                </p>
-                <p style="margin-top: 20px;">
-                    C'est une résignation lucide. L'addiction et le prix bas l'emportent sur l'éthique.
-                </p>
-            </div>
-            
-            <div style="flex: 1; min-width: 300px;">
-                <ul style="list-style: none;">
-                    <li style="margin-bottom: 30px;">
-                        <h4 style="color: white; font-family: var(--font-code);">01. ASYMÉTRIE DE POUVOIR</h4>
-                        <p style="color: #888; font-size: 0.9rem;">Les plateformes chinoises contrôlent toute la chaîne de valeur et les données, créant un déséquilibre géopolitique majeur (Isaac, 2024).</p>
-                    </li>
-                    <li style="margin-bottom: 30px;">
-                        <h4 style="color: white; font-family: var(--font-code);">02. ENVIRONNEMENT</h4>
-                        <p style="color: #888; font-size: 0.9rem;">La surconsommation pilotée par l'IA génère des millions de tonnes de déchets textiles. L'algorithme pousse à acheter ce dont on n'a pas besoin.</p>
+        <p class="reveal" style="color: var(--text-muted);">L’IA au cœur du parcours d’achat.</p>
+
+        <div class="split-layout">
+            <div class="card positive reveal">
+                <h3 style="color: var(--primary); margin-bottom: 20px;">L'Optimisation (Service)</h3>
+                <p style="margin-bottom: 20px;">De nombreuses sources montrent que l’IA permet de personnaliser en profondeur l’expérience d’achat :</p>
+                <ul class="argument-list">
+                    <li>
+                        Analyse des comportements, préférences et données personnelles pour affiner l’offre.
+                        <span class="citation">Source : Humblet, 2025 (1)</span>
                     </li>
                     <li>
-                        <h4 style="color: white; font-family: var(--font-code);">03. TRAVAIL</h4>
-                        <p style="color: #888; font-size: 0.9rem;">Derrière l'IA brillante se cachent des conditions de travail précaires dans les usines de la "Real-Time Fashion" (Yacoub & Plé, 2024).</p>
+                        Intégration de l’IA dans toutes les étapes : recommandation, interface, logistique.
+                        <span class="citation">Source : Kessenbrock, 2024 (10) ; Sibaud & Patissier, 2023 (15)</span>
+                    </li>
+                    <li>
+                        Détection rapide des tendances et adaptation de l’offre en temps réel.
+                        <span class="citation">Source : Lilingpadang et al., 2025 (12)</span>
+                    </li>
+                </ul>
+                <p style="margin-top: 20px; font-weight: bold;">→ Argument central : Levier de performance et gain de confort.</p>
+            </div>
+
+            <div class="card negative reveal">
+                <h3 style="color: var(--alert); margin-bottom: 20px;">L'Influence (Piège)</h3>
+                <p style="margin-bottom: 20px;">Mais le débat apparaît lorsque la personnalisation devient un outil d’influence :</p>
+                <ul class="argument-list">
+                    <li>
+                        Les algorithmes ajustent recommandations, prix et promotions pour maximiser le temps passé.
+                        <span class="citation">Source : Baumann et al., 2019 (4)</span>
+                    </li>
+                    <li>
+                        Shein et Temu utilisent ces techniques pour renforcer les achats impulsifs et former des habitudes addictives.
+                        <span class="citation">Source : Yacoub & Plé, 2024 (20)</span>
+                    </li>
+                    <li>
+                        Les consommateurs font "trop confiance" à l'algorithme, ce qui augmente les achats spontanés.
+                        <span class="citation">Source : Gallin & Portes, 2024 (7)</span>
                     </li>
                 </ul>
             </div>
+
+            <div class="debate-box reveal">
+                <h4 style="text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">La Controverse</h4>
+                <p style="font-size: 1.2rem; font-weight: 300;">
+                    "L’IA offre une meilleure expérience mais exploite les failles cognitives des utilisateurs. 
+                    <strong style="color: white;">Où placer la limite entre optimisation commerciale et manipulation psychologique ?</strong>"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-container">
+        <div class="section-title reveal">
+            <span class="section-number">02</span>
+            La Gamification
+        </div>
+        <p class="reveal" style="color: var(--text-muted);">Un levier d’engagement… ou d’addiction ?</p>
+
+        <div class="gamification-zone reveal">
+            <div style="position: absolute; top: 10px; right: 10px; background: var(--alert); color: white; padding: 2px 10px; font-size: 0.7rem;">DÉMONSTRATION</div>
+            <h3>ENVIRONNEMENT PROCHE DU JEU</h3>
+            <p style="color: #bbb; max-width: 600px; margin: 10px auto;">
+                Temu utilise des "récompenses variables" pour activer votre dopamine. Testez le mécanisme décrit par Al-Khalfa & Hameed (2025).
+            </p>
+            
+            <div class="slot-machine">
+                <div class="slot" id="s1">?</div>
+                <div class="slot" id="s2">?</div>
+                <div class="slot" id="s3">?</div>
+            </div>
+            
+            <button class="btn-temu" onclick="spin()">TOURNER LA ROUE</button>
+            <p id="result-msg" style="margin-top: 20px; font-weight: bold; height: 20px; color: var(--secondary);"></p>
+        </div>
+
+        <div class="mechanic-grid reveal">
+            <div class="card">
+                <h4 style="color: white;">Les Mécanismes</h4>
+                <ul class="argument-list">
+                    <li>Récompenses, défis, roues à gains, coupons avec compte à rebours.</li>
+                    <li>Adaptation dynamique des jeux selon les réactions de l'utilisateur (IA).</li>
+                    <span class="citation">Source : Bury, 2025 (6) ; Al-Khalfa & Hameed, 2025 (3)</span>
+                </ul>
+            </div>
+            <div class="card">
+                <h4 style="color: white;">Les Conséquences</h4>
+                <ul class="argument-list">
+                    <li>Activation des circuits de récompense du cerveau.</li>
+                    <li>Renforcement des achats impulsifs (surtout chez les jeunes).</li>
+                    <li>Développement de comportements proches de l’addiction.</li>
+                    <span class="citation">Source : Li et al., 2024 (11)</span>
+                </ul>
+            </div>
+        </div>
+
+        <div class="debate-box reveal" style="border-color: var(--secondary);">
+            <h4 style="color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">La Controverse</h4>
+            <p style="font-size: 1.1rem;">
+                "La gamification rend l’expérience amusante, mais elle devient aussi une stratégie de captation de l’attention extrêmement efficace, 
+                <strong style="color: white;">questionnant son éthique.</strong>"
+            </p>
         </div>
     </section>
 
     <footer>
-        <div class="container">
-            <div class="terminal">
-                <div class="terminal-header">user@controverse:~/conclusion$</div>
-                <div class="cmd">> run final_analysis.exe</div>
-                <div class="output">Analysing sources... [OK]</div>
-                <div class="output">Checking ethical boundaries... [ERROR]</div>
-                <div class="output">Conclusion: L'IA est devenue une arme de captation massive.</div>
-                <br>
-                <div class="cmd">> <span class="blink">_</span></div>
-            </div>
-            <p style="text-align: center; margin-top: 40px; font-size: 0.8rem; color: #444;">
-                Projet académique basé sur 21 sources scientifiques.<br>
-                © 2025 - Développé pour la démonstration.
-            </p>
-        </div>
+        <p>Projet de Controverse | Basé sur 21 sources académiques.</p>
+        <p style="opacity: 0.5;">Shein & Temu Case Study - 2025</p>
     </footer>
 
-    <div id="fomo" class="fomo-popup">
-        <h4 style="color: var(--alert); text-transform: uppercase; margin-bottom: 10px;">⚡ Offre expirante !</h4>
-        <p style="font-size: 0.9rem; margin-bottom: 10px;">L'algorithme a détecté que vous alliez partir. Voici un coupon de -95% pour vous retenir.</p>
-        <span class="timer-count" id="timer">04:59</span>
-        <button style="width: 100%; padding: 10px; background: black; color: white; border: none; margin-top: 10px; font-weight: bold; cursor: pointer;">RÉCLAMER MAINTENANT</button>
-    </div>
-
     <script>
-        // 1. LOADER DISAPPEAR
+        // 1. LOADER
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
-                initCharts(); // Start animations when loaded
-            }, 2000);
+            }, 1500);
         });
 
-        // 2. BACKGROUND MATRIX EFFECT (Canvas)
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const particles = [];
-        for(let i=0; i<50; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                speed: Math.random() * 2 + 0.5,
-                size: Math.random() * 2
+        // 2. SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
             });
-        }
+        });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        function animateBg() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#00f3ff';
-            particles.forEach(p => {
-                p.y += p.speed;
-                if(p.y > canvas.height) p.y = 0;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            requestAnimationFrame(animateBg);
-        }
-        animateBg();
-
-        // 3. GAMIFICATION LOGIC
-        function spinSlots() {
-            const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
-            const btn = document.querySelector('.btn-spin');
-            const msg = document.getElementById('slot-msg');
+        // 3. GAMIFICATION LOGIC (Slot Machine)
+        function spin() {
+            const slots = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+            const msg = document.getElementById('result-msg');
+            const btn = document.querySelector('.btn-temu');
             
             btn.disabled = true;
-            btn.innerText = "ALGORITHME EN COURS...";
-            msg.innerText = "";
+            btn.style.opacity = "0.5";
+            msg.innerText = "L'IA calcule votre récompense...";
 
-            let iterations = 0;
+            let i = 0;
             const interval = setInterval(() => {
                 slots.forEach(s => s.innerText = Math.floor(Math.random() * 9));
-                iterations++;
-                if (iterations > 20) {
+                i++;
+                if (i > 15) {
                     clearInterval(interval);
-                    // RIGGED RESULT (Always wins)
-                    slots[0].innerText = "7";
-                    slots[1].innerText = "7";
-                    slots[2].innerText = "7";
-                    msg.innerText = "✨ JACKPOT ! L'IA A CAPTURÉ VOTRE ATTENTION.";
-                    btn.innerText = "REJOUER (BOUCLE)";
+                    // Résultat truqué pour simuler la "fausse victoire" typique de Temu
+                    slots[0].innerText = "9";
+                    slots[1].innerText = "9";
+                    slots[2].innerText = "9";
+                    msg.innerText = "✨ COUPON -90% DÉBLOQUÉ ! (Ceci est une boucle addictive)";
+                    msg.classList.add('highlight');
+                    btn.innerText = "REJOUER";
                     btn.disabled = false;
-                    
-                    // TRIGGER FOMO POPUP
-                    setTimeout(() => {
-                        document.getElementById('fomo').classList.add('active');
-                        startTimer();
-                    }, 1000);
+                    btn.style.opacity = "1";
                 }
             }, 100);
-        }
-
-        // 4. CHART ANIMATION
-        function initCharts() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Reset animations hack to make them play
-                        document.querySelectorAll('.bar-fill').forEach(bar => {
-                            const width = bar.style.width;
-                            bar.style.width = '0%';
-                            setTimeout(() => bar.style.width = width, 100);
-                        });
-                    }
-                });
-            });
-            observer.observe(document.querySelector('.chart-container'));
-        }
-
-        // 5. FOMO TIMER
-        function startTimer() {
-            let time = 299; // 5 min
-            const display = document.getElementById('timer');
-            setInterval(() => {
-                let m = Math.floor(time / 60);
-                let s = time % 60;
-                display.innerText = `0${m}:${s < 10 ? '0'+s : s}`;
-                if(time > 0) time--;
-            }, 1000);
         }
     </script>
 </body>
