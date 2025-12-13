@@ -3,397 +3,538 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L'Algorithme de l'Addiction | Enquête Shein & Temu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>L'ALGORITHME DE L'ADDICTION | ENQUÊTE EXCLUSIVE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&family=Inter:wght@300;400;800&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE VARIABLES --- */
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
         :root {
-            --bg-deep: #050505;
-            --bg-card: #141414;
-            --text-main: #ededed;
-            --text-muted: #9ca3af;
-            --accent-temu: #ff6600; /* L'orange agressif */
-            --accent-shein: #000000;
-            --alert-red: #ff3b30;
-            --neon-blue: #00f3ff;
-            --font-main: 'Inter', sans-serif;
-            --font-code: 'Space Mono', monospace;
+            --bg-dark: #030303;
+            --bg-panel: #0f0f0f;
+            --primary: #00f3ff; /* Cyan Cyberpunk */
+            --secondary: #ff6600; /* Orange Temu */
+            --alert: #ff003c; /* Rouge Glitch */
+            --text-main: #e0e0e0;
+            --text-dim: #888888;
+            --font-display: 'Rajdhani', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-code: 'Share Tech Mono', monospace;
+            --easing: cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        /* --- RESET & BASE --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
         body {
-            background-color: var(--bg-deep);
+            background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: var(--font-main);
-            line-height: 1.7;
+            font-family: var(--font-body);
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        a { color: var(--neon-blue); text-decoration: none; transition: 0.3s; }
-        a:hover { color: white; text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* --- SCROLL PROGRESS BAR --- */
-        .progress-container {
-            width: 100%;
-            height: 4px;
-            background: #222;
+        /* =========================================
+           2. LOADER SCREEN (HACKER STYLE)
+           ========================================= */
+        #loader {
             position: fixed;
-            top: 0;
-            z-index: 1000;
-        }
-        .progress-bar {
-            height: 4px;
-            background: var(--accent-temu);
-            width: 0%;
-        }
-
-        /* --- TYPOGRAPHY --- */
-        h1, h2, h3 { font-weight: 900; letter-spacing: -1px; }
-        
-        .glitch {
-            position: relative;
-            font-size: 4rem;
-            line-height: 1.1;
-            text-transform: uppercase;
-        }
-        
-        .highlight { color: var(--accent-temu); }
-        .red-flag { color: var(--alert-red); font-weight: bold; }
-
-        /* --- SECTIONS --- */
-        section {
-            padding: 80px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            border-left: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* --- HERO HEADER --- */
-        .hero {
-            height: 100vh;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
-            padding-left: 10%;
-            background: radial-gradient(circle at 80% 20%, #1a0a00 0%, var(--bg-deep) 60%);
-            position: relative;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin-top: 20px;
-        }
-
-        .btn-start {
-            margin-top: 40px;
-            padding: 15px 40px;
-            background: transparent;
-            border: 2px solid var(--text-main);
-            color: var(--text-main);
+            align-items: center;
             font-family: var(--font-code);
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        }
+        .loader-text { font-size: 1.2rem; color: var(--primary); margin-bottom: 20px; }
+        .loader-bar { width: 300px; height: 2px; background: #333; position: relative; overflow: hidden; }
+        .loader-progress {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: load 2.5s var(--easing) forwards;
+        }
+        @keyframes load { 0% { width: 0%; } 100% { width: 100%; } }
+        .hidden { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+
+        /* =========================================
+           3. BACKGROUND ANIMATION (CANVAS)
+           ========================================= */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.3;
         }
 
-        .btn-start:hover {
-            background: var(--text-main);
-            color: var(--bg-deep);
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        /* =========================================
+           4. NAVIGATION & HUD
+           ========================================= */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+            background: rgba(3, 3, 3, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-
-        /* --- CARDS & GRID --- */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-top: 40px;
+        .brand {
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            color: white;
         }
-
-        .card {
-            background: var(--bg-card);
-            padding: 30px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .brand span { color: var(--alert); }
+        .nav-links a {
+            color: var(--text-dim); text-decoration: none;
+            margin-left: 30px; font-size: 0.9rem; font-weight: 500;
+            transition: 0.3s; position: relative;
         }
-
-        .card:hover {
-            border-color: var(--neon-blue);
-            transform: translateY(-5px);
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 1px;
+            background: var(--primary); transition: 0.3s;
         }
+        .nav-links a:hover::after { width: 100%; }
 
-        .card h3 { font-size: 1.5rem; margin-bottom: 15px; }
+        /* =========================================
+           5. HERO SECTION (GLITCH EFFECT)
+           ========================================= */
+        .hero {
+            height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative;
+            padding: 0 20px;
+        }
+        .hero-label {
+            font-family: var(--font-code); color: var(--primary);
+            font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 20px;
+            border: 1px solid var(--primary); padding: 5px 15px;
+        }
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 0.9; text-transform: uppercase;
+            margin-bottom: 30px; position: relative;
+        }
+        .glitch-text { position: relative; color: white; }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .glitch-text::before {
+            left: 2px; text-shadow: -1px 0 var(--alert); clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px; text-shadow: -1px 0 var(--primary); clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 5px, 0); }
+            5% { clip: rect(85px, 9999px, 100px, 0); }
+            10% { clip: rect(0, 0, 0, 0); }
+            100% { clip: rect(0, 0, 0, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(50px, 9999px, 80px, 0); }
+            5% { clip: rect(10px, 9999px, 20px, 0); }
+            10% { clip: rect(0, 0, 0, 0); }
+            100% { clip: rect(0, 0, 0, 0); }
+        }
+        .hero p { max-width: 600px; color: var(--text-dim); margin-bottom: 40px; font-size: 1.1rem; }
+        .btn-main {
+            padding: 18px 40px; background: white; color: black;
+            font-family: var(--font-code); font-weight: bold; text-decoration: none;
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+            transition: 0.3s;
+        }
+        .btn-main:hover { background: var(--primary); box-shadow: 0 0 30px var(--primary); transform: translateY(-5px); }
+
+        /* =========================================
+           6. CONTENT SECTIONS (GRID & CARDS)
+           ========================================= */
+        .container { max-width: 1200px; margin: 0 auto; padding: 100px 20px; }
         
-        .source-tag {
-            font-family: var(--font-code);
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 15px;
-            display: block;
-            border-top: 1px solid #333;
-            padding-top: 10px;
+        .section-header { margin-bottom: 80px; border-left: 4px solid var(--secondary); padding-left: 20px; }
+        .section-header h2 { font-family: var(--font-display); font-size: 3rem; text-transform: uppercase; }
+        .section-header p { font-family: var(--font-code); color: var(--secondary); margin-top: 10px; }
+
+        /* --- FEATURE GRID --- */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        
+        .feature-card {
+            background: var(--bg-panel); padding: 40px;
+            border: 1px solid #222; position: relative; overflow: hidden;
+            transition: 0.4s;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--secondary), transparent);
+            transform: scaleX(0); transform-origin: left; transition: 0.4s;
+        }
+        .feature-card:hover { border-color: #444; transform: translateY(-10px); }
+        .feature-card:hover::before { transform: scaleX(1); }
+        
+        .icon-box {
+            font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main);
+        }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; color: white; }
+        .feature-card p { font-size: 0.95rem; color: #aaa; margin-bottom: 20px; }
+        .citation {
+            font-size: 0.75rem; font-family: var(--font-code); color: #555;
+            border-top: 1px solid #222; padding-top: 15px; display: block;
         }
 
-        /* --- INTERACTIVE: GAMIFICATION DEMO --- */
-        .gamification-demo {
-            background: linear-gradient(135deg, #220a00 0%, #000 100%);
-            border: 2px solid var(--accent-temu);
-            padding: 40px;
-            text-align: center;
-            border-radius: 15px;
-            margin: 50px 0;
-            position: relative;
+        /* =========================================
+           7. INTERACTIVE GAMIFICATION MODULE
+           ========================================= */
+        .gamification-zone {
+            background: radial-gradient(circle at center, #220e00 0%, #000 70%);
+            border: 1px solid var(--secondary);
+            border-radius: 20px; padding: 60px 20px; text-align: center;
+            position: relative; overflow: hidden; margin: 50px 0;
         }
-
-        .wheel-btn {
-            background: var(--accent-temu);
-            color: white;
-            border: none;
-            padding: 20px 50px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            animation: pulse 1.5s infinite;
+        .zone-badge {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--alert); color: white; padding: 5px 10px;
+            font-weight: bold; font-size: 0.8rem; border-radius: 4px;
+            animation: pulse 1s infinite;
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 102, 0, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 102, 0, 0); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .slot-machine {
+            display: flex; justify-content: center; gap: 10px; margin: 30px 0;
         }
-
-        /* --- INTERACTIVE: FOMO TIMER --- */
-        .fomo-banner {
-            background: var(--alert-red);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            display: none; /* Hidden by default, JS triggers it */
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 300px;
-            z-index: 999;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 8px;
-            animation: slideIn 0.5s ease-out;
+        .slot {
+            width: 80px; height: 100px; background: #fff; color: #000;
+            font-size: 3rem; display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
         }
-
-        @keyframes slideIn { from {transform: translateX(100%);} to {transform: translateX(0);} }
-
-        /* --- REVEAL ON SCROLL --- */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
+        
+        .btn-spin {
+            background: var(--secondary); color: white; border: none;
+            padding: 15px 50px; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+            transition: 0.2s;
         }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        .btn-spin:active { transform: scale(0.95); }
 
-        /* --- FOOTER --- */
+        /* =========================================
+           8. DATA VISUALIZATION (CSS CHARTS)
+           ========================================= */
+        .chart-container {
+            display: flex; flex-direction: column; gap: 20px; background: #111; padding: 30px; border-radius: 10px;
+        }
+        .bar-group { display: flex; align-items: center; gap: 15px; }
+        .bar-label { width: 150px; font-family: var(--font-code); font-size: 0.85rem; color: #888; }
+        .bar-track { flex-grow: 1; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1.5s var(--easing); }
+        .bar-fill.warning { background: var(--secondary); }
+        .bar-fill.danger { background: var(--alert); }
+
+        /* =========================================
+           9. FOOTER & TERMINAL
+           ========================================= */
         footer {
-            padding: 60px 20px;
-            border-top: 1px solid #333;
-            margin-top: 100px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #666;
+            background: #000; padding: 80px 20px; border-top: 1px solid #222;
         }
+        .terminal {
+            max-width: 800px; margin: 0 auto; background: #0a0a0a;
+            border: 1px solid #333; padding: 20px; font-family: var(--font-code); font-size: 0.9rem;
+        }
+        .terminal-header { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px; color: #555; }
+        .cmd { color: var(--primary); }
+        .output { color: #888; margin-bottom: 10px; }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* MOBILE */
-        @media(max-width: 768px) {
-            .glitch { font-size: 2.5rem; }
-            .grid-2 { grid-template-columns: 1fr; }
-            section { padding: 40px 20px; border: none; }
-            .hero { padding-left: 20px; }
+        /* POPUP FOMO */
+        .fomo-popup {
+            position: fixed; bottom: 20px; right: 20px; width: 320px;
+            background: white; color: black; padding: 20px;
+            border-left: 10px solid var(--alert);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: translateX(150%); transition: transform 0.5s var(--easing);
+            z-index: 1000; font-family: var(--font-body);
         }
+        .fomo-popup.active { transform: translateX(0); }
+        .timer-count { font-weight: 900; font-size: 2rem; color: var(--alert); display: block; }
     </style>
 </head>
 <body>
 
-    <div class="progress-container">
-        <div class="progress-bar" id="myBar"></div>
+    <div id="loader">
+        <div class="loader-text">INITIALISATION DU SYSTÈME DE TRAÇAGE...</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
     </div>
 
-    <div id="fomoPopup" class="fomo-banner">
-        ⚠️ STOCK CRITIQUE ! <br>
-        <span style="font-size: 1.5rem" id="timer">05:00</span><br>
-        avant expiration de votre session.
-    </div>
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <div class="brand">PROJET <span>CONTROVERSE</span></div>
+        <div class="nav-links">
+            <a href="#personnalisation">01. CIBLAGE</a>
+            <a href="#gamification">02. ADDICTION</a>
+            <a href="#consequences">03. IMPACT</a>
+        </div>
+    </nav>
 
     <section class="hero">
-        <h1 class="glitch">Shopping <br><span class="highlight">Sous Influence</span></h1>
-        <p>Shein, Temu et l'IA : Comment les algorithmes transforment le commerce en une machine à addiction parfaitement huilée.</p>
-        <button class="btn-start" onclick="document.getElementById('intro').scrollIntoView({behavior: 'smooth'})">
-            LANCER L'ENQUÊTE
-        </button>
+        <div class="hero-label">ENQUÊTE EXCLUSIVE 2025</div>
+        <h1 class="glitch-text" data-text="SHOPPING SOUS INFLUENCE">SHOPPING SOUS <br><span style="color:var(--secondary)">INFLUENCE</span></h1>
+        <p>Shein, Temu et l'IA : Comment les algorithmes exploitent vos failles cognitives pour transformer votre cerveau en machine à acheter.</p>
+        <a href="#personnalisation" class="btn-main">DÉMARRER L'ANALYSE</a>
     </section>
 
-    <section id="intro" class="reveal">
-        <span style="color: var(--accent-temu); font-family: var(--font-code);">/// LA CONTROVERSE</span>
-        <h2>Optimisation ou Manipulation ?</h2>
-        <p>L'usage intensif de l'IA par les géants du e-commerce chinois soulève une controverse majeure. L'IA améliore-t-elle l'expérience client, ou manipule-t-elle nos vulnérabilités cognitives pour créer une dépendance ? Les recherches identifient 4 zones de friction.</p>
-    </section>
-
-    <section class="reveal">
-        <h2>1. Le Miroir Espion</h2>
-        <div class="grid-2">
-            <div class="card">
-                <h3>Le Visage Amical</h3>
-                <p>L'IA analyse vos comportements pour "affiner l'offre". C'est présenté comme un gain de confort : vous trouvez ce que vous aimez sans chercher. Une détection rapide des tendances pour une mode ultra-réactive.</p>
-                <span class="source-tag">Source : Humblet (2025), Kessenbrock (2024)</span>
-            </div>
-            <div class="card" style="border-color: var(--alert-red);">
-                <h3 class="red-flag">Le Piège Invisible</h3>
-                <p>Mais cette personnalisation devient un outil d'influence. Les algorithmes ajustent les prix et promotions pour maximiser non pas votre satisfaction, mais votre "temps passé". Nous avons tendance à faire une confiance aveugle à la machine.</p>
-                <span class="source-tag">Source : Baumann et al. (2018), Yacoub & Plé (2024)</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="reveal">
-        <h2>2. Le Casino Numérique</h2>
-        <p>Temu ne ressemble pas à un magasin, mais à un jeu vidéo. C'est la <strong>Gamification</strong>.</p>
-        
-        <div class="gamification-demo">
-            <h3 style="color: white; margin-bottom: 20px;">TESTEZ VOTRE DOPAMINE</h3>
-            <p style="margin-bottom: 30px; font-size: 0.9rem; color: #ccc;">Cliquez pour voir comment l'IA crée une récompense aléatoire.</p>
-            <button class="wheel-btn" onclick="spinWheel(this)">TOURNER LA ROUE</button>
-            <p id="reward-msg" style="margin-top: 20px; font-weight: bold; height: 30px;"></p>
-        </div>
-
-        <div class="card">
-            <h3>Pourquoi ça marche ?</h3>
-            <p>Ces mécanismes (roues, défis) activent le circuit de la récompense dans le cerveau. L'IA adapte la difficulté du jeu pour créer une boucle d'habitude, rendant l'utilisateur "accro" comme devant une machine à sous.</p>
-            <span class="source-tag">Source : Al-Khalfa (2025), Bury (2025), Li et al. (2024)</span>
-        </div>
-    </section>
-
-    <section class="reveal">
-        <h2>3. L'Urgence Fabriquée (FOMO)</h2>
-        <p>L'IA orchestre une économie de l'attention basée sur la peur de manquer (Fear Of Missing Out).</p>
-        
-        <ul style="list-style: none; margin-top: 30px;">
-            <li style="margin-bottom: 20px; padding-left: 20px; border-left: 3px solid var(--alert-red);">
-                <strong>⏳ Comptes à rebours :</strong> Souvent artificiels, ils court-circuitent la réflexion rationnelle.
-            </li>
-            <li style="margin-bottom: 20px; padding-left: 20px; border-left: 3px solid var(--alert-red);">
-                <strong>📉 Prix Dynamiques :</strong> Le prix change selon votre probabilité d'achat calculée par l'IA.
-            </li>
-            <li style="margin-bottom: 20px; padding-left: 20px; border-left: 3px solid var(--alert-red);">
-                <strong>🕸️ Trappes Attentionnelles :</strong> L'objectif est de maintenir l'utilisateur connecté le plus longtemps possible.
-            </li>
-        </ul>
-        <span class="source-tag">Source : Yacoub & Guerin (2024), Benamara (2024)</span>
-    </section>
-
-    <section class="reveal">
-        <h2>4. Le Prix à Payer</h2>
-        <div class="card" style="background: #000; border: 1px solid #444;">
-            <h3>Le Cynisme de Plateforme</h3>
-            <p>Le phénomène fascinant décrit par Liu & Gomez-Cruz (2025) : les utilisateurs <em>savent</em> qu'ils sont manipulés par Temu, mais continuent d'acheter. C'est une résignation face à la puissance de l'algorithme.</p>
+    <section id="personnalisation" class="container">
+        <div class="section-header">
+            <h2>01 / Personnalisation ou Manipulation ?</h2>
+            <p>SOURCE : HUMBLET (2025), BAUMANN ET AL. (2018)</p>
         </div>
         
-        <div class="grid-2">
-            <div>
-                <h4 style="color: white; margin-top: 20px;">Géopolitique</h4>
-                <p style="font-size: 0.9rem;">Asymétrie de pouvoir massive via la collecte de données par les plateformes chinoises.</p>
-                <span class="source-tag">Source : Isaac (2024)</span>
+        <div class="grid-3">
+            <div class="feature-card">
+                <div class="icon-box">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+                <h3>L'Illusion du Confort</h3>
+                <p>L'IA analyse vos comportements (clics, zoom, temps d'arrêt) pour affiner l'offre. La promesse ? Trouver la robe parfaite sans chercher.</p>
+                <span class="citation">"Un gain de confort apparent qui masque une surveillance constante." — Humblet</span>
             </div>
-            <div>
-                <h4 style="color: white; margin-top: 20px;">Éthique & Environnement</h4>
-                <p style="font-size: 0.9rem;">Conditions de travail opaques et surconsommation encouragée par des prix dérisoires.</p>
-                <span class="source-tag">Source : Yacoub & Plé (2024)</span>
+            
+            <div class="feature-card" style="border-color: var(--alert);">
+                <div class="icon-box" style="color: var(--alert);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                </div>
+                <h3>Prix Dynamiques</h3>
+                <p>Les algorithmes ajustent les prix et promotions en temps réel. Si l'IA détecte une impulsion (soirée, navigation rapide), elle augmente la pression.</p>
+                <span class="citation">"Maximiser la probabilité d'achat, pas la satisfaction." — Baumann</span>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-box">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
+                </div>
+                <h3>Confiance Aveugle</h3>
+                <p>Le consommateur finit par faire plus confiance à l'algorithme qu'à son propre jugement, baissant sa garde face aux achats inutiles.</p>
+                <span class="citation">Gallin & Portes (2024)</span>
             </div>
         </div>
     </section>
 
-    <section class="reveal" style="text-align: center; border: none;">
-        <h2 style="font-size: 3rem;">Conclusion</h2>
-        <p>L'IA est un outil puissant, mais entre les mains de la Fast-Fashion, elle devient une arme de captation massive. La frontière entre marketing et manipulation mentale n'a jamais été aussi floue.</p>
-        <br>
-        <a href="#" style="border-bottom: 1px solid var(--neon-blue);">Télécharger la bibliographie complète</a>
+    <section id="gamification" class="container">
+        <div class="section-header">
+            <h2>02 / Le Casino Numérique</h2>
+            <p>L'USINE À DOPAMINE - AL-KHALFA & HAMEED (2025)</p>
+        </div>
+
+        <div class="gamification-zone">
+            <div class="zone-badge">TEST LIVE</div>
+            <h3 style="font-size: 2rem; margin-bottom: 20px;">L'EXPÉRIENCE TEMU</h3>
+            <p style="max-width: 600px; margin: 0 auto; color: #ccc;">
+                Essayez de ne pas cliquer. Temu et Shein utilisent des "récompenses variables" pour activer votre circuit de la récompense, exactement comme une machine à sous.
+            </p>
+            
+            <div class="slot-machine">
+                <div class="slot" id="slot1">?</div>
+                <div class="slot" id="slot2">?</div>
+                <div class="slot" id="slot3">?</div>
+            </div>
+            
+            <button class="btn-spin" onclick="spinSlots()">TENTER MA CHANCE</button>
+            <p id="slot-msg" style="margin-top: 20px; font-family: var(--font-code); color: var(--secondary); height: 20px;"></p>
+        </div>
+
+        <div class="chart-container">
+            <h3 style="margin-bottom: 20px; font-family: var(--font-code);">TEMPS MOYEN PASSÉ (ESTIMATION)</h3>
+            
+            <div class="bar-group">
+                <span class="bar-label">Site E-commerce Classique</span>
+                <div class="bar-track"><div class="bar-fill" style="width: 25%;"></div></div>
+                <span style="color:#555">5 min</span>
+            </div>
+            
+            <div class="bar-group">
+                <span class="bar-label">Shein (Fast Fashion)</span>
+                <div class="bar-track"><div class="bar-fill warning" style="width: 55%;"></div></div>
+                <span style="color:#555">11 min</span>
+            </div>
+            
+            <div class="bar-group">
+                <span class="bar-label">Temu (Gamifié)</span>
+                <div class="bar-track"><div class="bar-fill danger" style="width: 90%;"></div></div>
+                <span style="color:var(--alert)">22 min+</span>
+            </div>
+            <p style="font-size: 0.8rem; color: #555; margin-top: 10px;">*Données illustratives basées sur les mécanismes de rétention (Li et al., 2024)</p>
+        </div>
+    </section>
+
+    <section id="consequences" class="container">
+        <div class="section-header">
+            <h2>03 / Le Prix à Payer</h2>
+            <p>ETHIQUE, ENVIRONNEMENT & SOCIÉTÉ</p>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 40px;">
+            <div style="flex: 1; min-width: 300px;">
+                <h3 style="color: var(--primary); margin-bottom: 20px;">Le Cynisme de Plateforme</h3>
+                <p style="margin-bottom: 20px;">
+                    Liu & Gomez-Cruz (2025) décrivent un phénomène fascinant : les utilisateurs <strong>savent</strong> qu'ils sont manipulés. Ils perçoivent les arnaques, les faux comptes à rebours et la surveillance.
+                </p>
+                <p style="border-left: 3px solid var(--text-dim); padding-left: 20px; font-style: italic; color: #aaa;">
+                    "Je sais que la roue est truquée, mais si je gagne un coupon de 2€, je suis content."
+                </p>
+                <p style="margin-top: 20px;">
+                    C'est une résignation lucide. L'addiction et le prix bas l'emportent sur l'éthique.
+                </p>
+            </div>
+            
+            <div style="flex: 1; min-width: 300px;">
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 30px;">
+                        <h4 style="color: white; font-family: var(--font-code);">01. ASYMÉTRIE DE POUVOIR</h4>
+                        <p style="color: #888; font-size: 0.9rem;">Les plateformes chinoises contrôlent toute la chaîne de valeur et les données, créant un déséquilibre géopolitique majeur (Isaac, 2024).</p>
+                    </li>
+                    <li style="margin-bottom: 30px;">
+                        <h4 style="color: white; font-family: var(--font-code);">02. ENVIRONNEMENT</h4>
+                        <p style="color: #888; font-size: 0.9rem;">La surconsommation pilotée par l'IA génère des millions de tonnes de déchets textiles. L'algorithme pousse à acheter ce dont on n'a pas besoin.</p>
+                    </li>
+                    <li>
+                        <h4 style="color: white; font-family: var(--font-code);">03. TRAVAIL</h4>
+                        <p style="color: #888; font-size: 0.9rem;">Derrière l'IA brillante se cachent des conditions de travail précaires dans les usines de la "Real-Time Fashion" (Yacoub & Plé, 2024).</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </section>
 
     <footer>
-        <p>Projet de Controverse - Basé sur 21 sources académiques (2018-2025).</p>
-        <p style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Ce site utilise des techniques de design persuasif à des fins éducatives.</p>
+        <div class="container">
+            <div class="terminal">
+                <div class="terminal-header">user@controverse:~/conclusion$</div>
+                <div class="cmd">> run final_analysis.exe</div>
+                <div class="output">Analysing sources... [OK]</div>
+                <div class="output">Checking ethical boundaries... [ERROR]</div>
+                <div class="output">Conclusion: L'IA est devenue une arme de captation massive.</div>
+                <br>
+                <div class="cmd">> <span class="blink">_</span></div>
+            </div>
+            <p style="text-align: center; margin-top: 40px; font-size: 0.8rem; color: #444;">
+                Projet académique basé sur 21 sources scientifiques.<br>
+                © 2025 - Développé pour la démonstration.
+            </p>
+        </div>
     </footer>
 
+    <div id="fomo" class="fomo-popup">
+        <h4 style="color: var(--alert); text-transform: uppercase; margin-bottom: 10px;">⚡ Offre expirante !</h4>
+        <p style="font-size: 0.9rem; margin-bottom: 10px;">L'algorithme a détecté que vous alliez partir. Voici un coupon de -95% pour vous retenir.</p>
+        <span class="timer-count" id="timer">04:59</span>
+        <button style="width: 100%; padding: 10px; background: black; color: white; border: none; margin-top: 10px; font-weight: bold; cursor: pointer;">RÉCLAMER MAINTENANT</button>
+    </div>
+
     <script>
-        // --- 1. BARRE DE PROGRESSION ---
-        window.onscroll = function() {
-            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            var scrolled = (winScroll / height) * 100;
-            document.getElementById("myBar").style.width = scrolled + "%";
-        };
-
-        // --- 2. ANIMATION AU SCROLL (REVEAL) ---
-        const reveals = document.querySelectorAll(".reveal");
-
-        const revealOnScroll = () => {
-            const windowHeight = window.innerHeight;
-            const elementVisible = 150;
-
-            reveals.forEach((reveal) => {
-                const elementTop = reveal.getBoundingClientRect().top;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveal.classList.add("active");
-                }
-            });
-        };
-
-        window.addEventListener("scroll", revealOnScroll);
-        // Trigger once on load
-        revealOnScroll();
-
-        // --- 3. GAMIFICATION DEMO ---
-        function spinWheel(btn) {
-            const msg = document.getElementById('reward-msg');
-            btn.innerHTML = "🎲 ...";
-            btn.style.animation = "none";
-            
-            // Simulation d'attente pour créer du suspense
+        // 1. LOADER DISAPPEAR
+        window.addEventListener('load', () => {
             setTimeout(() => {
-                const rewards = [
-                    "🎉 BRAVO ! Coupon -90% (Valide 10 min)", 
-                    "🔥 GAGNÉ ! Livraison Gratuite", 
-                    "🎁 SURPRISE ! 3 articles offerts"
-                ];
-                const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
-                
-                msg.innerHTML = randomReward;
-                msg.style.color = "#00ff00";
-                btn.innerHTML = "REJOUER";
-                
-                // Déclenchement du FOMO Popup après le gain
-                triggerFomo();
-            }, 1500);
+                document.getElementById('loader').classList.add('hidden');
+                initCharts(); // Start animations when loaded
+            }, 2000);
+        });
+
+        // 2. BACKGROUND MATRIX EFFECT (Canvas)
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for(let i=0; i<50; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 2 + 0.5,
+                size: Math.random() * 2
+            });
         }
 
-        // --- 4. FOMO POPUP LOGIC ---
-        function triggerFomo() {
-            const popup = document.getElementById('fomoPopup');
-            popup.style.display = "block";
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00f3ff';
+            particles.forEach(p => {
+                p.y += p.speed;
+                if(p.y > canvas.height) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // 3. GAMIFICATION LOGIC
+        function spinSlots() {
+            const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
+            const btn = document.querySelector('.btn-spin');
+            const msg = document.getElementById('slot-msg');
             
-            let time = 5 * 60; // 5 minutes
-            const timerElement = document.getElementById('timer');
-            
+            btn.disabled = true;
+            btn.innerText = "ALGORITHME EN COURS...";
+            msg.innerText = "";
+
+            let iterations = 0;
+            const interval = setInterval(() => {
+                slots.forEach(s => s.innerText = Math.floor(Math.random() * 9));
+                iterations++;
+                if (iterations > 20) {
+                    clearInterval(interval);
+                    // RIGGED RESULT (Always wins)
+                    slots[0].innerText = "7";
+                    slots[1].innerText = "7";
+                    slots[2].innerText = "7";
+                    msg.innerText = "✨ JACKPOT ! L'IA A CAPTURÉ VOTRE ATTENTION.";
+                    btn.innerText = "REJOUER (BOUCLE)";
+                    btn.disabled = false;
+                    
+                    // TRIGGER FOMO POPUP
+                    setTimeout(() => {
+                        document.getElementById('fomo').classList.add('active');
+                        startTimer();
+                    }, 1000);
+                }
+            }, 100);
+        }
+
+        // 4. CHART ANIMATION
+        function initCharts() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Reset animations hack to make them play
+                        document.querySelectorAll('.bar-fill').forEach(bar => {
+                            const width = bar.style.width;
+                            bar.style.width = '0%';
+                            setTimeout(() => bar.style.width = width, 100);
+                        });
+                    }
+                });
+            });
+            observer.observe(document.querySelector('.chart-container'));
+        }
+
+        // 5. FOMO TIMER
+        function startTimer() {
+            let time = 299; // 5 min
+            const display = document.getElementById('timer');
             setInterval(() => {
-                const minutes = Math.floor(time / 60);
-                let seconds = time % 60;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-                timerElement.innerHTML = `0${minutes}:${seconds}`;
+                let m = Math.floor(time / 60);
+                let s = time % 60;
+                display.innerText = `0${m}:${s < 10 ? '0'+s : s}`;
                 if(time > 0) time--;
             }, 1000);
         }
